@@ -216,13 +216,19 @@ const (
 
 func labelsForModel(m *kubeaiv1.Model) map[string]string {
 	engineLowerCase := strings.ToLower(m.Spec.Engine)
-	return map[string]string{
+	podlbmap := map[string]string{
 		"app":                          "model",
 		"model":                        m.Name,
 		appKubernetesIOName:            engineLowerCase,
 		"app.kubernetes.io/instance":   engineLowerCase + "-" + m.Name,
 		"app.kubernetes.io/managed-by": "kubeai",
 	}
+	for k, v := range m.Labels {
+		if _, exists := podlbmap[k]; !exists {
+			podlbmap[k] = v
+		}
+	}
+	return podlbmap
 }
 
 func (r *ModelReconciler) annotationsForModel(m *kubeaiv1.Model) map[string]string {
